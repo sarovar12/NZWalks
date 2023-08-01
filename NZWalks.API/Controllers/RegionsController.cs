@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using NZWalks.API.Data;
 using NZWalks.API.Models.Domain;
 
 namespace NZWalks.API.Controllers
@@ -8,31 +9,41 @@ namespace NZWalks.API.Controllers
     [Route("api/[controller]")]
     [ApiController]
     public class RegionsController : ControllerBase
+
     {
+        private readonly NZWalksDbContext dbContext;
+
+        public RegionsController(NZWalksDbContext dbContext)
+        {
+            this.dbContext = dbContext;
+        }
+
         //GET ALL REGIONS
         //GET: https://localhost:portnumber/api/regions 
 
         [HttpGet]    
         public IActionResult GetAll()
         {
-            var regions = new List<Region>
-            {
-                new Region
-                {
-                    Id = Guid.NewGuid(),
-                    Name="Auckland Region",
-                    Code="AKL",
-                    RegionImageURL="https://images.pexels.com/photos/17319423/pexels-photo-17319423/free-photo-of-ornamented-walls-around-glass-ceiling-in-dome.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
-                },
-                new Region {
-                     Id = Guid.NewGuid(),
-                    Name="Wellington Region",
-                    Code="WLG",
-                    RegionImageURL="https://images.pexels.com/photos/17319423/pexels-photo-17319423/free-photo-of-ornamented-walls-around-glass-ceiling-in-dome.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-                },
-            };
+            var regions = dbContext.Regions.ToList();
+           return Ok(regions);
+        }
 
-            return Ok(regions);
+        //Get Single Region (Get region by id)
+        //GET:https://localhost:portnumber/api/regions/{id}
+        [HttpGet]
+        [Route("{id:Guid}")] //make sure this matches the argument in GetByID()
+        public IActionResult GetByID([FromRoute]Guid id) {
+
+           // var region = dbContext.Regions.Find(id); //find method only uses primary key
+            
+            var region = dbContext.Regions.FirstOrDefault(x => x.Id == id);
+
+            if(region == null)
+            {
+                return NotFound();
+
+            }
+            return Ok(region);
         }
     }
 }
