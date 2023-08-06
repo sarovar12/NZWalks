@@ -22,7 +22,7 @@ namespace NZWalks.API.Controllers
         //GET ALL REGIONS
         //GET: https://localhost:portnumber/api/regions 
 
-        [HttpGet]    
+        [HttpGet]
         public IActionResult GetAll()
         {
             //Get data from database - Domain Models
@@ -40,24 +40,24 @@ namespace NZWalks.API.Controllers
                     RegionImageURL = regionDomain.RegionImageURL,
                 });
             }
-    
+
 
             //return DTOs
-           return Ok(regionsDTO);
+            return Ok(regionsDTO);
         }
 
         //Get Single Region (Get region by id)
         //GET:https://localhost:portnumber/api/regions/{id}
         [HttpGet]
         [Route("{id:Guid}")] //make sure this matches the argument in GetByID()
-        public IActionResult GetByID([FromRoute]Guid id) {
+        public IActionResult GetByID([FromRoute] Guid id) {
 
-           // var region = dbContext.Regions.Find(id); //find method only uses primary key
-            
+            // var region = dbContext.Regions.Find(id); //find method only uses primary key
+
             //Get region domain model from DB
             var regionDomain = dbContext.Regions.FirstOrDefault(x => x.Id == id);
 
-            if(regionDomain == null)
+            if (regionDomain == null)
             {
                 return NotFound();
 
@@ -71,7 +71,7 @@ namespace NZWalks.API.Controllers
                 Name = regionDomain.Name,
                 RegionImageURL = regionDomain.RegionImageURL
             };
-            
+
             return Ok(regionDTO);
         }
 
@@ -105,7 +105,7 @@ namespace NZWalks.API.Controllers
             };
 
 
-           //This is just here to display new thing getting created at json
+            //This is just here to display new thing getting created at json
             return CreatedAtAction(nameof(GetByID), new { id = regionDomainModel.Id }
                 , regionDTO);
         }
@@ -115,13 +115,13 @@ namespace NZWalks.API.Controllers
         //PUT: https://localhost:portnumber/api/regions/{id}
         [HttpPut]
         [Route("{id:Guid}")]
-        public IActionResult Update([FromRoute] Guid id, [FromBody] UpdateRegionRequestDTO updateRegionRequestDTO )
+        public IActionResult Update([FromRoute] Guid id, [FromBody] UpdateRegionRequestDTO updateRegionRequestDTO)
         {
             //check if it exists or not
-           var regionDomainModel = dbContext.Regions.FirstOrDefault(x => x.Id == id);
+            var regionDomainModel = dbContext.Regions.FirstOrDefault(x => x.Id == id);
 
-            if(regionDomainModel == null) {
-                return NotFound(); 
+            if (regionDomainModel == null) {
+                return NotFound();
             }
             //Map DTO to Domain Model
             regionDomainModel.Code = updateRegionRequestDTO.Code;
@@ -142,5 +142,39 @@ namespace NZWalks.API.Controllers
 
         }
 
+        //Delete Region 
+        //DELETE: https://localhost:portnumber/api/regions/{id}
+        [HttpDelete]
+        [Route("{id:Guid}")]
+        public IActionResult Delete([FromRoute] Guid id)
+        {
+           var regionDomainModel= dbContext.Regions.FirstOrDefault(x => x.Id == id);
+            if(regionDomainModel == null)
+            {
+                return NotFound();
+            }
+
+            //Delete region
+            dbContext.Remove(regionDomainModel);
+            dbContext.SaveChanges();
+
+
+            //Map Domain Model into dto
+
+          var   regionDto = new Region
+            {
+                Code = regionDomainModel.Code,
+                Name = regionDomainModel.Name,
+                RegionImageURL = regionDomainModel.RegionImageURL
+            };
+
+            return Ok(regionDto);
+
+        }
+
+
     }
 }
+
+        
+
