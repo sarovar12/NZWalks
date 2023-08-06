@@ -110,5 +110,37 @@ namespace NZWalks.API.Controllers
                 , regionDTO);
         }
 
+
+        //Update Region
+        //PUT: https://localhost:portnumber/api/regions/{id}
+        [HttpPut]
+        [Route("{id:Guid}")]
+        public IActionResult Update([FromRoute] Guid id, [FromBody] UpdateRegionRequestDTO updateRegionRequestDTO )
+        {
+            //check if it exists or not
+           var regionDomainModel = dbContext.Regions.FirstOrDefault(x => x.Id == id);
+
+            if(regionDomainModel == null) {
+                return NotFound(); 
+            }
+            //Map DTO to Domain Model
+            regionDomainModel.Code = updateRegionRequestDTO.Code;
+            regionDomainModel.Name = updateRegionRequestDTO.Name;
+            regionDomainModel.RegionImageURL = updateRegionRequestDTO.RegionImageURL;
+
+            dbContext.SaveChanges();
+
+            //Convert Domain Model to DTO
+            var regionDTO = new RegionDTO
+            {
+                Id = regionDomainModel.Id,
+                Code = regionDomainModel.Code,
+                Name = regionDomainModel.Name,
+                RegionImageURL = regionDomainModel.RegionImageURL
+            };
+            return Ok(regionDTO);
+
+        }
+
     }
 }
